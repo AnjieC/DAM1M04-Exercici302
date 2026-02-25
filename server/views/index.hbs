@@ -5,6 +5,35 @@
         <title>Home</title>
     </head>
     <body>
+        {{> menu}}
+        <div class="contenido">
+            <h1>Películas y Categorías destacadas</h1>
+            <!-- Parte películas -->
+            <section>
+                <h2>Películas:</h2>
+                <div>
+                    {{#each film}}
+                        <h3>{{title}}</h3>
+                        <p><strong>Año:</strong> {{release_year}}</p>
+                        <p><strong>Actores:</strong></p>
+                        <ul>
+                            {{#each actor}}
+                                <li>{{first_name}} {{last_name}}</li>
+                            {{/each}}
+                        </ul>
+                    {{/each}}
+                </div>
+            </section>
+            <!-- Parte categorías -->
+            <section>
+                <h2>Categorías:</h2>
+                <ul>
+                    {{#each category}}
+                        <li>{{name}}</li>
+                    {{/each}}
+                </ul>
+            </section>
+        </div>
         {{> footer}}
     </body>
 </html>

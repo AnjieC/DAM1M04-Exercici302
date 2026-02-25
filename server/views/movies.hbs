@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        {{> header}}
+        <title>Movies</title>
+    </head>
+    <body>
+        {{> menu}}
+        <h1>Películas</h1>
+        <div>
+            {{#each film}}
+                <h2>{{title}}</h2>
+                <p>{{description}}</p>
+                <p><strong>Año:</strong> {{release_year}}</p>
+                <p><strong>Idiomas:</strong></p>
+                <ul>
+                    {{#each language}}
+                        <li>{{name}}</li>
+                    {{/each}}
+                </ul>
+                <p><strong>Duración:</strong> {{length}}</p>
+                <p><strong>Rating:</strong> {{rating}}</p>
+                <p><strong>Actores:</strong></p>
+                <ul>
+                    {{#each actor}}
+                        <li>{{first_name}} {{last_name}}</li>
+                    {{/each}}
+                </ul>
+            {{/each}}
+        </div>
+        {{> footer}}
+    </body>
+</html>
