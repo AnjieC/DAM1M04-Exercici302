@@ -215,6 +215,7 @@ app.get('/customers', async (req, res) => {
 const httpServer = app.listen(port, () => {
   console.log(`http://localhost:${port}`);
   console.log(`http://localhost:${port}/movies`);
+  console.log(`http://localhost:${port}/customers`);
 });
 
 // Graceful shutdown

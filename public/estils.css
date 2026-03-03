@@ -25,3 +25,11 @@ nav a:hover{
     color: yellow;
     letter-spacing: 1.5px;
 }
+
+footer{
+    width: 100%;
+    padding: 15px;
+    background-color: black;
+    color: white;
+    text-align: center;
+}
