@@ -5,11 +5,14 @@ body{
     font-optical-sizing: auto;
     font-weight: 400;
     font-style: normal;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
 nav{
     width: 100%;
-    padding: 15px;
+    padding: 15px 0;
     background-color: black;
 }
 
@@ -28,8 +31,24 @@ nav a:hover{
 
 footer{
     width: 100%;
-    padding: 15px;
+    padding: 15px 0;
     background-color: black;
     color: white;
+    text-align: center;
+}
+
+.contenido{
+    flex: 1;
+}
+
+section{
+    margin: 0 400px;
+}
+
+h1{
+    font-size: xx-large;
+}
+
+.texto_centrado{
     text-align: center;
 }
