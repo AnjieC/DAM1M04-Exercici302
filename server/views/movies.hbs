@@ -12,17 +12,12 @@
                 <h2>{{title}}</h2>
                 <p>{{description}}</p>
                 <p><strong>Año:</strong> {{release_year}}</p>
-                <p><strong>Idiomas:</strong></p>
-                <ul>
-                    {{#each language}}
-                        <li>{{name}}</li>
-                    {{/each}}
-                </ul>
+                <p><strong>Idioma:</strong> {{name}}</p>
                 <p><strong>Duración:</strong> {{length}}</p>
                 <p><strong>Rating:</strong> {{rating}}</p>
                 <p><strong>Actores:</strong></p>
                 <ul>
-                    {{#each actor}}
+                    {{#each actors}}
                         <li>{{first_name}} {{last_name}}</li>
                     {{/each}}
                 </ul>

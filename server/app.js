@@ -26,7 +26,7 @@ if (!isProxmox) {
     port: 3306,
     user: 'super',
     password: '1234',
-    database: 'escola'
+    database: 'sakila'
   });
 }
 
@@ -57,33 +57,61 @@ hbs.registerPartials(path.join(__dirname, 'views', 'partials'));
 // Route
 app.get('/', async (req, res) => {
   try {
-    // Obtenir les dades de la base de dades
-    const categoryRows = await db.query('SELECT category_id, name FROM category ORDER BY category_id LIMIT 5');
-    const filmRows = await db.query('SELECT film_id, title, release_year FROM film ORDER BY film_id LIMIT 5');
+    const categoryRows = await db.query(`
+      SELECT category_id, name
+      FROM category
+      ORDER BY category_id
+      LIMIT 5
+    `);
+
+    const filmRows = await db.query(`
+      SELECT film_id, title, release_year
+      FROM film
+      ORDER BY film_id
+      LIMIT 5
+    `);
+
     const actorRows = await db.query(`
       SELECT a.actor_id, a.first_name, a.last_name, fa.film_id
       FROM actor a
       JOIN film_actor fa ON fa.actor_id = a.actor_id
       JOIN (
-          SELECT film_id
-          FROM film
-          ORDER BY film_id
-          LIMIT 5
+        SELECT film_id
+        FROM film
+        ORDER BY film_id
+        LIMIT 5
       ) f ON f.film_id = fa.film_id
     `);
 
-    // Transformar les dades a JSON (per les plantilles .hbs)
-    // Cal informar de les columnes i els seus tipus
-    const categoryJson = db.table_to_json(categoryRows, { category_id: 'number', name: 'string' });
-    const filmJson = db.table_to_json(filmRows, { film_id: 'number', title: 'string', release_year: 'number' });
-    const actorJson = db.table_to_json(actorRows, { actor_id: 'number', first_name: 'string', last_name: 'string', film_id: 'number' });
+    const categoryJson = db.table_to_json(categoryRows, {
+      category_id: 'number',
+      name: 'string'
+    });
+
+    const filmJson = db.table_to_json(filmRows, {
+      film_id: 'number',
+      title: 'string',
+      release_year: 'number'
+    });
+
+    const actorJson = db.table_to_json(actorRows, {
+      actor_id: 'number',
+      first_name: 'string',
+      last_name: 'string',
+      film_id: 'number'
+    });
 
     // Asociar actores a cada película
     const filmsWithActors = filmJson.map(film => {
-      const actorsForFilm = actorJson
+      const actors = actorJson
         .filter(actor => actor.film_id === film.film_id)
-        .map(actor => ({ actor_id: actor.actor_id, first_name: actor.first_name, last_name: actor.last_name }));
-      return { ...film, actors: actorsForFilm };
+        .map(actor => ({
+          actor_id: actor.actor_id,
+          first_name: actor.first_name,
+          last_name: actor.last_name
+        }));
+
+      return { ...film, actors };
     });
 
     // Llegir l'arxiu .json amb dades comunes per a totes les pàgines
@@ -91,18 +119,13 @@ app.get('/', async (req, res) => {
       fs.readFileSync(path.join(__dirname, 'data', 'common.json'), 'utf8')
     );
 
-    // Construir l'objecte de dades per a la plantilla
-    const data = {
+    res.render('index', {
       category: categoryJson,
       film: filmsWithActors,
-      common: commonData
-    };
-
-    // Renderitzar la plantilla amb les dades
-    res.render('index', {
-        ...data,
-        currentPage: 'home'
+      common: commonData,
+      currentPage: 'home'
     });
+
   } catch (err) {
     console.error(err);
     res.status(500).send('Error consultant la base de dades');
@@ -111,31 +134,49 @@ app.get('/', async (req, res) => {
 
 app.get('/movies', async (req, res) => {
   try {
-    // Obtenir les dades de la base de dades
-    const filmRows = await db.query('SELECT f.film_id, f.title, f.description, f.release_year, f.length, f.rating, l.name FROM film f JOIN language l ON f.language_id = l.language_id ORDER BY film_id LIMIT 15');
+    const filmRows = await db.query(`
+      SELECT film_id, title, description, release_year
+      FROM film
+      ORDER BY film_id
+      LIMIT 15
+    `);
+
     const actorRows = await db.query(`
       SELECT a.actor_id, a.first_name, a.last_name, fa.film_id
       FROM actor a
       JOIN film_actor fa ON fa.actor_id = a.actor_id
       JOIN (
-          SELECT film_id
-          FROM film
-          ORDER BY film_id
-          LIMIT 15
+        SELECT film_id
+        FROM film
+        ORDER BY film_id
+        LIMIT 15
       ) f ON f.film_id = fa.film_id
     `);
 
-    // Transformar les dades a JSON (per les plantilles .hbs)
-    // Cal informar de les columnes i els seus tipus
-    const filmJson = db.table_to_json(filmRows, { film_id: 'number', title: 'string', description: 'string', release_year: 'number', length: 'number', rating: 'string', name: 'string' });
-    const actorJson = db.table_to_json(actorRows, { actor_id: 'number', first_name: 'string', last_name: 'string', film_id: 'number' });
+    const filmJson = db.table_to_json(filmRows, {
+      film_id: 'number',
+      title: 'string',
+      description: 'string',
+      release_year: 'number'
+    });
+
+    const actorJson = db.table_to_json(actorRows, {
+      actor_id: 'number',
+      first_name: 'string',
+      last_name: 'string',
+      film_id: 'number'
+    });
 
     // Asociar actores a cada película
     const filmsWithActors = filmJson.map(film => {
-      const actorsForFilm = actorJson
+      const actors = actorJson
         .filter(actor => actor.film_id === film.film_id)
-        .map(actor => ({ actor_id: actor.actor_id, first_name: actor.first_name, last_name: actor.last_name }));
-      return { ...film, actors: actorsForFilm };
+        .map(actor => ({
+          first_name: actor.first_name,
+          last_name: actor.last_name
+        }));
+
+      return { ...film, actors };
     });
 
     // Llegir l'arxiu .json amb dades comunes per a totes les pàgines
@@ -143,17 +184,12 @@ app.get('/movies', async (req, res) => {
       fs.readFileSync(path.join(__dirname, 'data', 'common.json'), 'utf8')
     );
 
-    // Construir l'objecte de dades per a la plantilla
-    const data = {
-      film: filmsWithActors,
-      common: commonData
-    };
-
-    // Renderitzar la plantilla amb les dades
     res.render('movies', {
-        ...data,
-        currentPage: 'movies'
+      film: filmsWithActors,
+      common: commonData,
+      currentPage: 'movies'
     });
+
   } catch (err) {
     console.error(err);
     res.status(500).send('Error consultant la base de dades');
@@ -162,31 +198,43 @@ app.get('/movies', async (req, res) => {
 
 app.get('/customers', async (req, res) => {
   try {
-    // Obtenir les dades de la base de dades
-    const filmRows = await db.query('SELECT f.film_id, f.title, f.description, f.release_year, f.length, f.rating, l.name FROM film f JOIN language l ON f.language_id = l.language_id ORDER BY film_id LIMIT 15');
-    const actorRows = await db.query(`
-      SELECT a.actor_id, a.first_name, a.last_name, fa.film_id
-      FROM actor a
-      JOIN film_actor fa ON fa.actor_id = a.actor_id
-      JOIN (
-          SELECT film_id
-          FROM film
-          ORDER BY film_id
-          LIMIT 15
-      ) f ON f.film_id = fa.film_id
+    const customerRows = await db.query(`
+      SELECT customer_id, first_name, last_name
+      FROM customer
+      ORDER BY customer_id
+      LIMIT 25
     `);
 
-    // Transformar les dades a JSON (per les plantilles .hbs)
-    // Cal informar de les columnes i els seus tipus
-    const filmJson = db.table_to_json(filmRows, { film_id: 'number', title: 'string', description: 'string', release_year: 'number', length: 'number', rating: 'string', name: 'string' });
-    const actorJson = db.table_to_json(actorRows, { actor_id: 'number', first_name: 'string', last_name: 'string', film_id: 'number' });
+    const rentalRows = await db.query(`
+      SELECT r.customer_id, f.title
+      FROM rental r
+      JOIN inventory i ON i.inventory_id = r.inventory_id
+      JOIN film f ON f.film_id = i.film_id
+      WHERE r.customer_id IN (
+        SELECT customer_id
+        FROM customer
+        ORDER BY customer_id
+        LIMIT 25
+      )
+    `);
 
-    // Asociar actores a cada película
-    const filmsWithActors = filmJson.map(film => {
-      const actorsForFilm = actorJson
-        .filter(actor => actor.film_id === film.film_id)
-        .map(actor => ({ actor_id: actor.actor_id, first_name: actor.first_name, last_name: actor.last_name }));
-      return { ...film, actors: actorsForFilm };
+    const customerJson = db.table_to_json(customerRows, {
+      customer_id: 'number',
+      first_name: 'string',
+      last_name: 'string'
+    });
+
+    const rentalJson = db.table_to_json(rentalRows, {
+      customer_id: 'number',
+      title: 'string'
+    });
+
+    const customersWithRentals = customerJson.map(customer => {
+      const rentals = rentalJson
+        .filter(r => r.customer_id === customer.customer_id)
+        .slice(0, 5);
+
+      return { ...customer, rentals };
     });
 
     // Llegir l'arxiu .json amb dades comunes per a totes les pàgines
@@ -194,17 +242,12 @@ app.get('/customers', async (req, res) => {
       fs.readFileSync(path.join(__dirname, 'data', 'common.json'), 'utf8')
     );
 
-    // Construir l'objecte de dades per a la plantilla
-    const data = {
-      film: filmsWithActors,
-      common: commonData
-    };
-
-    // Renderitzar la plantilla amb les dades
     res.render('customers', {
-        ...data,
-        currentPage: 'customers'
+      customers: customersWithRentals,
+      common: commonData,
+      currentPage: 'customers'
     });
+
   } catch (err) {
     console.error(err);
     res.status(500).send('Error consultant la base de dades');
